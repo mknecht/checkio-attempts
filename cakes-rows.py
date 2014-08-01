@@ -7,28 +7,30 @@
 from collections import defaultdict
 from math import cos, pi, sin
 
+precision = 1
+factor = 8
+
 
 def get_counter_array(points):
     dimx = reduce(max, map(lambda p: p[0], points))
     dimy = reduce(max, map(lambda p: p[1], points))
-    maxlines = dimx + dimy
+    maxlines = (dimx + dimy) * factor
+    print("maxlines {}".format(maxlines))
     parameterspace = defaultdict(lambda: [0, []])
     for i, j in points:
-        for h in (float(h) / maxlines * pi for h in range(maxlines + 1)):
+        for h in (float(h) / maxlines * pi for h in range(maxlines)):
             p = i * sin(h) + j * cos(h)
-            parameterspace[(round(p, 1), h)][0] += 1
-            parameterspace[(round(p, 1), h)][1] += [(i, j)]
-            if h <= .1 and len(parameterspace) < 3:
-                print((round(p, 1), h))
-                print(parameterspace)
+            parameterspace[(round(p, factor), h)][0] += 1
+            parameterspace[(round(p, factor), h)][1] += [(i, j)]
     return parameterspace
 
 
 def find_minimums(counters):
-    print("qualified:")
-    for c in [c for c in counters.values() if c[0] >= 3]:
+    qualified = sorted([(v, k) for k, v in counters.items() if v[0] >= 3])
+    print("qualified: {}".format(len(qualified)))
+    for c in qualified:
         print(c)
-    return [c for c in counters.values() if c[0] >= 3]
+    return qualified
 
 
 def checkio(cakes):
@@ -36,10 +38,12 @@ def checkio(cakes):
     arr = get_counter_array(cakes)
     numlines = len(find_minimums(arr))
     print("All:")
-    for k, v in sorted(arr.items()):
-        print("{} -> {}".format(v, k))
-    print("nulls:")
-    print([(k[0], v) for k, v in arr.items() if k[1] == 0])
+    # for k, v in sorted(arr.items()):
+    #     if (7, 5) in v[1]:
+    #         print("{} -> {}".format(v, k))
+    # print("nulls:")
+    # print([(k[0], v) for k, v in arr.items() if k[1] == 0])
+    print(numlines)
     return numlines
 
 
