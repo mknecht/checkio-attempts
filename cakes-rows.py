@@ -1,16 +1,18 @@
 # Using a Hough transformation, from the problem space to a
-# space with two parameters, as explained her:
-# two parameter
+# space with two parameters, as explained here:
 # http://classes.soe.ucsc.edu/cmpe264/Spring08/Lec6.pdf
 # https://www.cs.sfu.ca/~hamarneh/ecopy/compvis1999_hough.pdf
+#
+# Because evenly distributed sampling of angles did not seem to find
+# the correct angles, we only try those that direct to another point.
 
 from collections import defaultdict
 from math import atan, cos, pi, sin
 
-precision = 1
-factor = 8
-
-grad = lambda a: a * 180 / pi
+# Sometimes same lines are recognized as different points in parameter
+# space due to marginal rounding differences.
+# So, we round the float, to make sure.
+precision = 4
 
 
 def get_angles(p, others):
@@ -24,35 +26,23 @@ def get_angles(p, others):
 
 
 def get_counter_array(points):
-    parameterspace = defaultdict(lambda: [0, []])
+    parameterspace = defaultdict(lambda: [])
     for i, j in points:
         others = set([tuple(p) for p in points]) - {(i, j)}
         for h in get_angles((i, j), others):
             p = i * sin(h) + j * cos(h)
-            parameterspace[(round(p, factor), h)][0] += 1
-            parameterspace[(round(p, factor), h)][1] += [(i, j)]
+            # Adding points that contribute to line for better debugability.
+            # A counter would have sufficed, of course.
+            parameterspace[(round(p, precision), h)] += [(i, j)]
     return parameterspace
 
 
 def find_minimums(counters):
-    qualified = sorted([(v, k) for k, v in counters.items() if v[0] >= 3])
-    print("qualified: {}".format(len(qualified)))
-    for c in qualified:
-        print(c)
-    return qualified
+    return {tuple(points) for points in counters.values() if len(points) >= 3}
 
 
 def checkio(cakes):
-    print("THE CAKE: {}".format(cakes))
-    arr = get_counter_array(cakes)
-    numlines = len(find_minimums(arr))
-    print("All:")
-    for k, v in sorted(arr.items()):
-        print("{} -> {}".format(v, k))
-    # print("nulls:")
-    # print([(k[0], v) for k, v in arr.items() if k[1] == 0])
-    print(numlines)
-    return numlines
+    return len(find_minimums(get_counter_array(cakes)))
 
 
 #These "asserts" using only for self-checking and not necessary for auto-testing
