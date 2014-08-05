@@ -6,32 +6,34 @@
 # D 500 (quingenti)
 # M 1,000 (mille)
 
-place2symbol = "IXCM"
+symbols = "IVXLCDM  "
 
-replacements = [
-    ("I" * 9, "IX"),
-    ("I" * 5, "V"),
-    ("I" * 4, "IV"),
-    ("X" * 9, "XC"),
-    ("X" * 5, "L"),
-    ("X" * 4, "XL"),
-    ("C" * 9, "CM"),
-    ("C" * 5, "D"),
-    ("C" * 4, "CD"),
-]
+
+def numberToString(digit, one, five, ten):
+    return (
+        (digit == 9 and (one + ten))
+        or (digit > 4 and (five + one * (digit - 5)))
+        or (digit == 4 and (one + five))
+        or one * digit
+    )
+
+
+def digitAt(number, place):
+    # Place is zero-based
+    return number % (10 ** (place + 1)) / (10 ** place)
 
 
 def checkio(number):
-    snumber = str(number)
-    replaceable = "".join([
-        place2symbol[len(snumber) - invp - 1] * int(d)
-        for invp, d
-        in enumerate(snumber)
-        if d != "0"  # There is no zero in the roman number system.
+    return "".join([
+        numberToString(
+            digitAt(number, place),
+            symbols[place*2],
+            symbols[place*2+1],
+            symbols[place*2+2]
+        )
+        for place in range(3, -1, -1)
     ])
-    for old, new in replacements:
-        replaceable = replaceable.replace(old, new)
-    return replaceable
+
 
 if __name__ == '__main__':
     assert checkio(6) == 'VI', '6'
