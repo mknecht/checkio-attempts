@@ -6,12 +6,7 @@
 # D 500 (quingenti)
 # M 1,000 (mille)
 
-place2symbol = {
-    0: "I",
-    1: "X",
-    2: "C",
-    3: "M",
-}
+place2symbol = "IXCM"
 
 replacements = [
     ("I" * 9, "IX"),
